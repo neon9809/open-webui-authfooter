@@ -166,6 +166,7 @@ COPY --chown=$UID:$GID --from=build /app/package.json /app/package.json
 
 # copy backend files
 COPY --chown=$UID:$GID ./backend .
+RUN mkdir -p /app/backend/open_webui/static
 
 EXPOSE 8080
 

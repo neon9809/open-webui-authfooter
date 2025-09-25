@@ -36,6 +36,10 @@
 
 	let ldapUsername = '';
 
+	let registrationContent = '';
+	let registrationLoaded = false;
+	let registrationError = false;
+
 	const setSessionUser = async (sessionUser, redirectPath: string | null = null) => {
 		if (sessionUser) {
 			console.log(sessionUser);
@@ -153,6 +157,24 @@
 		}
 	}
 
+	async function loadRegistrationInfo() {
+    	try {
+    	    // OpenWebUI后端会处理 /static/registration.html 的请求
+    	    const response = await fetch('/static/registration.html');
+        	if (response.ok) {
+            	registrationContent = await response.text();
+            	registrationLoaded = true;
+        	} else {
+            	console.warn('Registration file not found or not accessible');
+            	registrationError = true;
+        	}
+    	} catch (error) {
+        	console.error('Failed to load registration info:', error);
+        	registrationError = true;
+    	}
+	}
+
+
 	onMount(async () => {
 		const redirectPath = $page.url.searchParams.get('redirect');
 		if ($user !== undefined) {
@@ -179,6 +201,7 @@
 		} else {
 			onboarding = $config?.onboarding ?? false;
 		}
+		loadRegistrationInfo();
 	});
 </script>
 
@@ -556,6 +579,13 @@
 								</div>
 							{/if}
 						</div>
+						{#if registrationLoaded && registrationContent}
+    						<div class="registration-info mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+        						<div class="text-center text-sm text-gray-600 dark:text-gray-400">
+            						{@html registrationContent}
+        						</div>
+    						</div>
+						{/if}
 						{#if $config?.metadata?.login_footer}
 							<div class="max-w-3xl mx-auto">
 								<div class="mt-2 text-[0.7rem] text-gray-500 dark:text-gray-400 marked">
